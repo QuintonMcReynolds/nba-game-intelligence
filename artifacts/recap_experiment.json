@@ -1,0 +1,64 @@
+{
+  "checker": {
+    "template_claims": 11034,
+    "false_alarms": 0,
+    "planted_errors": 1226,
+    "planted_caught": 0.9314845024469821
+  },
+  "pilot": {
+    "games": 40,
+    "error_rate_raw": 0.875,
+    "error_rate_grounded": 0.725,
+    "power_at_main_n": 0.9050508897890738,
+    "mcnemar_discordant": [
+      9,
+      3
+    ]
+  },
+  "main": {
+    "games_raw": 150,
+    "games_grounded": 150,
+    "srm_p": 1.0,
+    "any_error_raw": 0.9266666666666666,
+    "any_error_grounded": 0.6266666666666667,
+    "diff": -0.29999999999999993,
+    "diff_ci95": [
+      -0.3879326152780049,
+      -0.212067384721995
+    ],
+    "z": 6.238178237392582,
+    "p_value": 4.4269608418960807e-10,
+    "errors_per_recap": [
+      3.18,
+      1.1533333333333333
+    ],
+    "claims_per_recap": [
+      5.6866666666666665,
+      11.053333333333333
+    ],
+    "claim_precision": [
+      0.4407971864009379,
+      0.8956574185765983
+    ],
+    "precision_diff_ci95": [
+      0.41605900711448646,
+      0.4923443494680038
+    ],
+    "winner_right": [
+      0.38,
+      0.4866666666666667
+    ],
+    "score_right": [
+      0.78,
+      0.9266666666666666
+    ],
+    "invented_player_rate": [
+      0.21333333333333335,
+      0.0
+    ],
+    "seconds": [
+      3.483,
+      3.2789333333333337
+    ]
+  }
+}

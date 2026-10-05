@@ -1,0 +1,136 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: >
+  NBA play-by-play lake on AWS: S3 (raw + curated Parquet), the same PySpark ETL as an AWS
+  Glue job, a Glue Data Catalog crawler, and an Athena workgroup for the SQL in sql/.
+
+Parameters:
+  ProjectName:
+    Type: String
+    Default: nba-game-intelligence
+    AllowedPattern: "[a-z0-9-]+"
+  GlueWorkers:
+    Type: Number
+    Default: 4
+    MinValue: 2
+    MaxValue: 20
+
+Resources:
+  LakeBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      BucketName: !Sub "${ProjectName}-lake-${AWS::AccountId}"
+      VersioningConfiguration: {Status: Enabled}
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault: {SSEAlgorithm: AES256}
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      LifecycleConfiguration:
+        Rules:
+          - Id: expire-athena-results
+            Prefix: athena-results/
+            Status: Enabled
+            ExpirationInDays: 7
+
+  GlueRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal: {Service: glue.amazonaws.com}
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSGlueServiceRole
+      Policies:
+        - PolicyName: lake-access
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: [s3:GetObject, s3:PutObject, s3:DeleteObject]
+                Resource: !Sub "${LakeBucket.Arn}/*"
+              - Effect: Allow
+                Action: s3:ListBucket
+                Resource: !GetAtt LakeBucket.Arn
+
+  Database:
+    Type: AWS::Glue::Database
+    Properties:
+      CatalogId: !Ref AWS::AccountId
+      DatabaseInput:
+        Name: !Join ["_", !Split ["-", !Ref ProjectName]]
+        Description: Curated NBA play-by-play tables
+
+  EtlJob:
+    Type: AWS::Glue::Job
+    Properties:
+      Name: !Sub "${ProjectName}-etl"
+      Role: !GetAtt GlueRole.Arn
+      GlueVersion: "5.0"
+      WorkerType: G.1X
+      NumberOfWorkers: !Ref GlueWorkers
+      Timeout: 60
+      Command:
+        Name: glueetl
+        PythonVersion: "3"
+        ScriptLocation: !Sub "s3://${LakeBucket}/code/etl_spark.py"
+      DefaultArguments:
+        "--input": !Sub "s3://${LakeBucket}/lake"
+        "--output": !Sub "s3://${LakeBucket}/lake/curated"
+        "--enable-metrics": "true"
+        "--job-language": python
+
+  CuratedCrawler:
+    Type: AWS::Glue::Crawler
+    Properties:
+      Name: !Sub "${ProjectName}-curated"
+      Role: !GetAtt GlueRole.Arn
+      DatabaseName: !Ref Database
+      Targets:
+        S3Targets:
+          - Path: !Sub "s3://${LakeBucket}/lake/curated/events/"
+          - Path: !Sub "s3://${LakeBucket}/lake/curated/games/"
+          - Path: !Sub "s3://${LakeBucket}/lake/curated/player_games/"
+      SchemaChangePolicy:
+        UpdateBehavior: UPDATE_IN_DATABASE
+        DeleteBehavior: LOG
+
+  CrawlAfterEtl:
+    Type: AWS::Glue::Trigger
+    Properties:
+      Name: !Sub "${ProjectName}-crawl-after-etl"
+      Type: CONDITIONAL
+      StartOnCreation: true
+      Predicate:
+        Conditions:
+          - LogicalOperator: EQUALS
+            JobName: !Ref EtlJob
+            State: SUCCEEDED
+      Actions:
+        - CrawlerName: !Ref CuratedCrawler
+
+  Workgroup:
+    Type: AWS::Athena::WorkGroup
+    Properties:
+      Name: !Sub "${ProjectName}"
+      State: ENABLED
+      WorkGroupConfiguration:
+        EnforceWorkGroupConfiguration: true
+        BytesScannedCutoffPerQuery: 10737418240   # 10 GB guardrail per query
+        ResultConfiguration:
+          OutputLocation: !Sub "s3://${LakeBucket}/athena-results/"
+
+Outputs:
+  Bucket:
+    Value: !Ref LakeBucket
+  GlueJob:
+    Value: !Ref EtlJob
+  AthenaWorkgroup:
+    Value: !Ref Workgroup

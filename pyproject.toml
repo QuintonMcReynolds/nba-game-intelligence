@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "nbagi"
+version = "0.1.0"
+description = "NBA play-by-play at scale: Spark lake, win probability (scikit-learn + TensorFlow), clutch, and fact-checked LLM recaps with an A/B test"
+requires-python = ">=3.10"
+dependencies = [
+  "pyspark>=4.0", "duckdb>=1.0", "pandas", "numpy", "pyarrow", "scipy", "scikit-learn",
+  "tensorflow", "torch", "transformers", "accelerate", "matplotlib", "pyyaml",
+]
+
+[project.optional-dependencies]
+dev = ["pytest", "ruff", "cfn-lint"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]
+ignore = ["B905"]

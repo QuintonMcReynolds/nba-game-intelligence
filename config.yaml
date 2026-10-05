@@ -1,0 +1,27 @@
+# Every parameter of the pipeline. `make all` reads this file.
+seed: 20261004
+
+data:
+  source: https://github.com/shufinskiy/nba_data/raw/main/datasets/nbastatsv3_{season}.tar.xz
+  first_season: 2004            # 2004-05 ...
+  last_season: 2025             # ... through 2025-26 (season = year it starts)
+
+win_probability:
+  train_seasons: [2004, 2019]
+  valid_seasons: [2020, 2021]
+  test_seasons: [2022, 2025]
+  train_sample: 3000000         # event rows sampled for training
+  elo: {k: 20, home_advantage: 100, carryover: 0.75}
+
+clutch:
+  minutes_left: 5
+  max_margin: 5
+  min_events: 40
+
+recaps:
+  model: Qwen/Qwen2.5-0.5B-Instruct
+  season: 2025                  # games drawn from 2025-26
+  pilot_games: 40
+  experiment_games: 300
+  max_new_tokens: 180
+  raw_pbp_lines: 30

@@ -1,0 +1,103 @@
+{
+  "n_train": 3000000,
+  "n_valid": 1126986,
+  "n_test": 2430915,
+  "models": {
+    "logistic": {
+      "valid_log_loss": 0.46778082201864063,
+      "test_log_loss": 0.455417790456548,
+      "test_brier": 0.1523893475537124,
+      "test_ece": 0.018565909097172314,
+      "train_log_loss": 0.44926384022106136
+    },
+    "gbm_unconstrained": {
+      "valid_log_loss": 0.4850105476900361,
+      "test_log_loss": 0.47547612335979994,
+      "test_brier": 0.15769276018388562,
+      "test_ece": 0.030077194901545066,
+      "train_log_loss": 0.411486811379756
+    },
+    "gbm_monotone": {
+      "valid_log_loss": 0.47138516319353413,
+      "test_log_loss": 0.4574172075399283,
+      "test_brier": 0.15295345348531664,
+      "test_ece": 0.022323654815743034,
+      "train_log_loss": 0.4462493621253016
+    },
+    "keras_mlp": {
+      "valid_log_loss": 0.4688854551344133,
+      "test_log_loss": 0.4553162922464312,
+      "test_brier": 0.15233596950511571,
+      "test_ece": 0.015667828309354915
+    },
+    "pregame_elo": {
+      "valid_log_loss": 0.6659331755463257,
+      "test_log_loss": 0.6347542753570458,
+      "test_brier": 0.22074817589365717,
+      "test_ece": 0.06461653755054324
+    }
+  },
+  "selected_on_validation": "logistic",
+  "vs_selected_ci95": {
+    "gbm_unconstrained": [
+      0.015288809615824062,
+      0.025095921257625543
+    ],
+    "gbm_monotone": [
+      0.0007341027941258861,
+      0.003340693844088985
+    ],
+    "keras_mlp": [
+      -0.0008257354845364473,
+      0.0006132553895689401
+    ],
+    "pregame_elo": [
+      0.16836185751596233,
+      0.18992069772852818
+    ]
+  },
+  "by_time_left": {
+    "1st quarter": {
+      "logistic": 0.6005963745661366,
+      "gbm_unconstrained": 0.6186958065866335,
+      "gbm_monotone": 0.6007613139545577,
+      "keras_mlp": 0.5991006219167319,
+      "pregame_elo": 0.6339189119402338
+    },
+    "2nd quarter": {
+      "logistic": 0.5338964181191761,
+      "gbm_unconstrained": 0.5592796849998488,
+      "gbm_monotone": 0.5365382978729477,
+      "keras_mlp": 0.5341423247179361,
+      "pregame_elo": 0.6334544262241636
+    },
+    "3rd quarter": {
+      "logistic": 0.4354815043133361,
+      "gbm_unconstrained": 0.459534978678089,
+      "gbm_monotone": 0.43842645841631794,
+      "keras_mlp": 0.43717780351838426,
+      "pregame_elo": 0.6325558120179275
+    },
+    "4th: >5 min left": {
+      "logistic": 0.32268698001757085,
+      "gbm_unconstrained": 0.3419399215113549,
+      "gbm_monotone": 0.3265825172499308,
+      "keras_mlp": 0.3236419424855831,
+      "pregame_elo": 0.6323556311404376
+    },
+    "4th: last 5 min": {
+      "logistic": 0.18707352674382702,
+      "gbm_unconstrained": 0.19256683482464143,
+      "gbm_monotone": 0.18715686186200584,
+      "keras_mlp": 0.18441270076050018,
+      "pregame_elo": 0.6425704866268545
+    },
+    "overtime": {
+      "logistic": 0.4504913262524578,
+      "gbm_unconstrained": 0.457251673127465,
+      "gbm_monotone": 0.4510218183762276,
+      "keras_mlp": 0.4417001340789372,
+      "pregame_elo": 0.7145031147279324
+    }
+  }
+}
